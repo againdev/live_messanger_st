@@ -2,7 +2,7 @@ import { ObjectType, Field } from '@nestjs/graphql';
 
 @ObjectType()
 export class User {
-  @Field({nullable: true})
+  @Field({ nullable: true })
   id?: number;
 
   @Field()
@@ -20,6 +20,6 @@ export class User {
   @Field({ nullable: true })
   createdAt?: Date;
 
-  @Field()
+  @Field({ nullable: true })
   updatedAt?: Date;
 }

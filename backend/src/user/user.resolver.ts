@@ -16,20 +16,20 @@ export class UserResolver {
   @UseGuards(GraphqlAuthGuard)
   @Mutation(() => User)
   async updateProfile(
-    @Args('fullName') fullName: string,
+    @Args('fullname') fullname: string,
     @Args('file', { type: () => GraphQLUpload, nullable: true })
     file: FileUpload,
     @Context() context: { req: Request },
   ) {
     const imageUrl = file ? await this.storeImageAndGetUrl(file) : null;
     const userId = context.req.user.sub;
-    return this.userService.updateProfile(userId, fullName, imageUrl);
+    return this.userService.updateProfile(userId, fullname, imageUrl);
   }
 
   private async storeImageAndGetUrl(file: FileUpload) {
     const { createReadStream, filename } = await file;
     const uniqueFileName = `${uuidv4()}_${filename}`;
-    const imagePath = join(process.cwd(), 'public', uniqueFileName);
+    const imagePath = join(process.cwd(), 'public', 'images', uniqueFileName);
     const imageUrl = `${process.env.APP_URL}/${uniqueFileName}`;
     const readStream = createReadStream();
     readStream.pipe(createWriteStream(imagePath));
