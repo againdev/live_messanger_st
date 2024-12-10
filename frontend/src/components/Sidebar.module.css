@@ -1,12 +1,11 @@
 .navbar {
   width: 100px;
   height: 100vh;
-  padding: var(--mantine-spacing-md);
+  padding: 16px; 
   position: fixed;
   display: flex;
   flex-direction: column;
-  border-right: 1px solid
-    light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
+  border-right: 1px solid #d1d1d1; 
 }
 
 .navbarMain {
@@ -17,24 +16,22 @@
 .link {
   width: 50px;
   height: 50px;
-  border-radius: var(--mantine-radius-md);
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-0));
+  color: #555; 
+}
 
-  &:hover {
-    background-color: light-dark(
-      var(--mantine-color-gray-0),
-      var(--mantine-color-dark-5)
-    );
-  }
+.link:hover {
+  background-color: #f1f1f1; 
+}
 
-  &[data-active] {
-    &,
-    &:hover {
-      background-color: var(--mantine-color-blue-light);
-      color: var(--mantine-color-blue-light-color);
-    }
-  }
+.link[data-active] {
+  background-color: #d0e1ff;
+  color: #1a73e8;
+}
+
+.link[data-active]:hover {
+  background-color: #d0e1ff;
 }

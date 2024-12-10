@@ -30,9 +30,24 @@ export class UserResolver {
     const { createReadStream, filename } = await file;
     const uniqueFileName = `${uuidv4()}_${filename}`;
     const imagePath = join(process.cwd(), 'public', 'images', uniqueFileName);
-    const imageUrl = `${process.env.APP_URL}/${uniqueFileName}`;
+    const imageUrl = `${process.env.APP_URL}/images/${uniqueFileName}`;
     const readStream = createReadStream();
     readStream.pipe(createWriteStream(imagePath));
     return imageUrl;
+  }
+
+  @UseGuards(GraphqlAuthGuard)
+  @Query(() => [User])
+  async searchUsers(
+    @Args('fullname') fullname: string,
+    @Context() context: { req: Request },
+  ) {
+    return this.userService.searchUsers(fullname, context.req.user.sub);
+  }
+
+  @UseGuards(GraphqlAuthGuard)
+  @Query(() => [User])
+  getUsersOfChatroom(@Args('chatroomId') chatroomId: number) {
+    return this.userService.getUsersOfChatroom(chatroomId);
   }
 }
