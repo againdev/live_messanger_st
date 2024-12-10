@@ -1,38 +1,35 @@
 "use client";
-import { useMutation, useQuery } from "@apollo/client";
+import { useState } from "react";
 import {
+  Stepper,
   Button,
   Group,
   Modal,
-  MultiSelect,
-  Stepper,
   TextInput,
+  MultiSelect,
 } from "@mantine/core";
-import { useForm } from "@mantine/form";
-import { IconPlus } from "@tabler/icons-react";
-import React from "react";
+import { CREATE_CHATROOM } from "../graphql/mutations/CreateChatroom";
 import {
   AddUsersToChatroomMutation,
-  AddUsersToChatroomMutationVariables,
   Chatroom,
   CreateChatroomMutation,
-  CreateChatroomMutationVariables,
   SearchUsersQuery,
-  SearchUsersQueryVariables,
+  User,
 } from "../gql/graphql";
-import { ADD_USERS_TO_CHATROOM } from "../graphql/mutations/AddUsersToChatroom";
-import { CREATE_CHATROOM } from "../graphql/mutations/CreateChatroom";
+import { useMutation, useQuery } from "@apollo/client";
+import { useForm } from "@mantine/form";
+import { IconPlus } from "@tabler/icons-react";
 import { SEARCH_USERS } from "../graphql/queries/SearchUsers";
+import { ADD_USERS_TO_CHATROOM } from "../graphql/mutations/AddUsersToChatroom";
 import { useGeneralStore } from "../store/generalStore";
 
 export const AddChatroom = () => {
-  const [active, setActive] = React.useState(1);
-  const [highestStepVisited, setHighestStepVisited] = React.useState(active);
+  const [active, setActive] = useState(1);
+  const [highestStepVisited, setHighestStepVisited] = useState(active);
 
   const isCreateRoomModalOpen = useGeneralStore(
     (state) => state.isCreateRoomModalOpen
   );
-
   const toggleCreateRoomModal = useGeneralStore(
     (state) => state.toggleCreateRoomModal
   );
@@ -48,10 +45,8 @@ export const AddChatroom = () => {
     setHighestStepVisited((hSC) => Math.max(hSC, nextStep));
   };
 
-  const [createChatroom, { loading }] = useMutation<
-    CreateChatroomMutation,
-    CreateChatroomMutationVariables
-  >(CREATE_CHATROOM);
+  const [createChatroom, { loading }] =
+    useMutation<CreateChatroomMutation>(CREATE_CHATROOM);
 
   const form = useForm({
     initialValues: {
@@ -62,9 +57,8 @@ export const AddChatroom = () => {
         value.trim().length >= 3 ? null : "Name must be at least 3 characters",
     },
   });
-
   const [newlyCreatedChatroom, setNewlyCreatedChatroom] =
-    React.useState<Chatroom | null>(null);
+    useState<Chatroom | null>(null);
 
   const handleCreateChatroom = async () => {
     await createChatroom({
@@ -84,22 +78,16 @@ export const AddChatroom = () => {
       refetchQueries: ["GetChatroomsForUser"],
     });
   };
-
-  const [searchTerm, setSearchTerm] = React.useState("");
-  const { data, refetch } = useQuery<
-    SearchUsersQuery,
-    SearchUsersQueryVariables
-  >(SEARCH_USERS, {
+  const [searchTerm, setSearchTerm] = useState("");
+  const { data, refetch } = useQuery<SearchUsersQuery>(SEARCH_USERS, {
     variables: { fullname: searchTerm },
   });
-  const [addUsersToChatroom, { loading: loadingUsers }] = useMutation<
-    AddUsersToChatroomMutation,
-    AddUsersToChatroomMutationVariables
-  >(ADD_USERS_TO_CHATROOM, {
-    refetchQueries: ["GetChatroomsForUser"],
-  });
+  const [addUsersToChatroom, { loading: loadingAddUsers }] =
+    useMutation<AddUsersToChatroomMutation>(ADD_USERS_TO_CHATROOM, {
+      refetchQueries: ["GetChatroomsForUser"],
+    });
 
-  const [selectedUsers, setSelectedUsers] = React.useState<string[]>([]);
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const handleAddUsersToChatroom = async () => {
     await addUsersToChatroom({
       variables: {
@@ -108,7 +96,7 @@ export const AddChatroom = () => {
         userIds: selectedUsers.map((userId) => parseInt(userId)),
       },
       onCompleted: () => {
-        handleStepChange(active + 1);
+        handleStepChange(1);
         toggleCreateRoomModal();
         setSelectedUsers([]);
         setNewlyCreatedChatroom(null);
@@ -121,11 +109,10 @@ export const AddChatroom = () => {
       },
     });
   };
-
   let debounceTimeout: NodeJS.Timeout;
+
   const handleSearchChange = (term: string) => {
     setSearchTerm(term);
-
     clearTimeout(debounceTimeout);
     debounceTimeout = setTimeout(() => {
       refetch();
@@ -136,7 +123,6 @@ export const AddChatroom = () => {
     label: string;
     value: string;
   };
-
   const selectItems: SelectItem[] =
     data?.searchUsers?.map((user) => ({
       label: user.fullname,
@@ -157,9 +143,11 @@ export const AddChatroom = () => {
               error={form.errors.name}
               {...form.getInputProps("name")}
             />
-            <Button mt="md" type="submit">
-              Create Room
-            </Button>
+            {form.values.name && (
+              <Button mt={"md"} type="submit">
+                Create Room
+              </Button>
+            )}
           </form>
         </Stepper.Step>
         <Stepper.Completed>
@@ -167,9 +155,10 @@ export const AddChatroom = () => {
             onSearchChange={handleSearchChange}
             nothingFoundMessage="No users found"
             searchable
-            pb="xl"
+            pb={"xl"}
+            data={selectItems}
             label="Choose the members you want to add"
-            placeholder="Pick all the users you want to add this chatroom"
+            placeholder="Pick all the users you want to add to this chatroom"
             onChange={(values) => setSelectedUsers(values)}
           />
         </Stepper.Completed>
